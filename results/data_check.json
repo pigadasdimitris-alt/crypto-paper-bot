@@ -1,0 +1,77 @@
+{
+ "generated": "2026-11-21T18:24:32+00:00",
+ "series": {
+  "BTC_15m": {
+   "bars": 107136,
+   "bad_removed": 0,
+   "gaps": 0,
+   "spikes_over_25pct": 0,
+   "source": "data.binance.vision",
+   "from": "2023-11-01T00:00:00+00:00",
+   "to": "2026-11-20T23:45:00+00:00",
+   "cross_check_coinbase": {
+    "days_compared": 1116,
+    "max_dev_pct": 0.272,
+    "max_dev_day": "2026-10-29",
+    "days_over_2pct": 0
+   }
+  },
+  "BTC_5m": {
+   "bars": 321408,
+   "bad_removed": 0,
+   "gaps": 0,
+   "spikes_over_25pct": 0,
+   "source": "data.binance.vision",
+   "from": "2023-11-01T00:00:00+00:00",
+   "to": "2026-11-20T23:55:00+00:00"
+  },
+  "ETH_15m": {
+   "bars": 107136,
+   "bad_removed": 0,
+   "gaps": 0,
+   "spikes_over_25pct": 0,
+   "source": "data.binance.vision",
+   "from": "2023-11-01T00:00:00+00:00",
+   "to": "2026-11-20T23:45:00+00:00",
+   "cross_check_coinbase": {
+    "days_compared": 1116,
+    "max_dev_pct": 0.237,
+    "max_dev_day": "2024-03-08",
+    "days_over_2pct": 0
+   }
+  },
+  "ETH_5m": {
+   "bars": 321408,
+   "bad_removed": 0,
+   "gaps": 0,
+   "spikes_over_25pct": 0,
+   "source": "data.binance.vision",
+   "from": "2023-11-01T00:00:00+00:00",
+   "to": "2026-11-20T23:55:00+00:00"
+  },
+  "SOL_15m": {
+   "bars": 107136,
+   "bad_removed": 0,
+   "gaps": 0,
+   "spikes_over_25pct": 0,
+   "source": "data.binance.vision",
+   "from": "2023-11-01T00:00:00+00:00",
+   "to": "2026-11-20T23:45:00+00:00",
+   "cross_check_coinbase": {
+    "days_compared": 1116,
+    "max_dev_pct": 0.283,
+    "max_dev_day": "2026-10-29",
+    "days_over_2pct": 0
+   }
+  },
+  "SOL_5m": {
+   "bars": 321408,
+   "bad_removed": 0,
+   "gaps": 0,
+   "spikes_over_25pct": 0,
+   "source": "data.binance.vision",
+   "from": "2023-11-01T00:00:00+00:00",
+   "to": "2026-11-20T23:55:00+00:00"
+  }
+ }
+}
