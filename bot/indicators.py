@@ -86,3 +86,9 @@ def highest_prev(h, n):
             dq.pop()
         dq.append(i)
     return out
+
+
+def lowest_prev(l, n):
+    """Χαμηλότερο low των n ΠΡΟΗΓΟΥΜΕΝΩΝ μπαρών (χωρίς την τρέχουσα)."""
+    neg = highest_prev([-v for v in l], n)
+    return [None if v is None else -v for v in neg]

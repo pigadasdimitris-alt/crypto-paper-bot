@@ -10,8 +10,18 @@ FEE_PER_SIDE = 0.001        # 0,1%
 SLIPPAGE_PER_SIDE = 0.0005  # 0,05%
 
 # --- Backtest ---
-HISTORY_START = "2023-11-01"   # ~3 χρόνια ιστορικό
+HISTORY_START = "2023-11-01"   # ~3 χρόνια ιστορικό (intraday)
 TIMEFRAMES = ["15m", "5m"]
+
+# Κάθε «σουίτα» είναι μια ξεχωριστή υπόθεση με κανόνες κλειδωμένους ΠΡΙΝ το τρέξιμο.
+SUITES = {
+    # Υπόθεση 1 (21/11/2026): intraday — ΑΠΕΤΥΧΕ σε όλα.
+    "intraday": {"timeframes": ["15m", "5m"], "start": "2023-11-01",
+                 "strategies": ["breakout", "meanrev", "ema"], "out": "BACKTEST"},
+    # Υπόθεση 2 (21/11/2026): trend following σε μεγαλύτερα κεριά, όπου τα κόστη βαραίνουν λιγότερο.
+    "trend": {"timeframes": ["4h", "1d"], "start": "2020-09-01",
+              "strategies": ["donchian", "ema_slow", "sma50"], "out": "BACKTEST_TREND"},
+}
 OOS_DAYS = 182                 # τελευταίοι ~6 μήνες = «άγνωστα» δεδομένα (κρίνουμε ΜΟΝΟ από εδώ)
 WARMUP_BARS = 250              # μπάρες για να «ζεσταθούν» οι δείκτες (EMA200 κ.λπ.)
 

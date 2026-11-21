@@ -157,7 +157,8 @@ def fmt_date(ms):
     return datetime.fromtimestamp(ms / 1000, timezone.utc).strftime("%d/%m/%Y")
 
 
-def run_timeframe(tf):
+def run_timeframe(tf, strats=None):
+    strats = strats or S.ALL
     series = {}
     for sym in C.SYMBOLS:
         p = DATA / f"{sym}_{tf}.csv"
@@ -172,7 +173,7 @@ def run_timeframe(tf):
         splits[sym] = k
         out["symbols"][sym] = {"bars": len(b["t"]), "from": fmt_date(b["t"][0]), "split": fmt_date(b["t"][k]),
                                "to": fmt_date(b["t"][-1])}
-    for strat in [*S.ALL, None]:
+    for strat in [*strats, None]:
         key = strat.key if strat else "buyhold"
         res = {"name": strat.name if strat else "Buy & hold", "description": strat.description if strat else
                "Αγορά στην αρχή της περιόδου και κράτημα ως το τέλος (1/3 σε κάθε νόμισμα).",
@@ -212,8 +213,8 @@ HEAD = ["| Στρατηγική | Trades | Επιτυχία | Profit factor | Μ
         "|---|---|---|---|---|---|---|"]
 
 
-def report(all_res):
-    L = ["# Αποτελέσματα backtest", "",
+def report(all_res, title="Αποτελέσματα backtest"):
+    L = [f"# {title}", "",
          f"Κόστη: {C.FEE_PER_SIDE*100:.2f}% fee + {C.SLIPPAGE_PER_SIDE*100:.2f}% slippage **ανά πλευρά** "
          f"(~{2*COST*100:.1f}% ανά πλήρες trade). Χαρτοφυλάκιο 1/3 σε BTC, ETH, SOL. "
          f"Out-of-sample = τελευταίες {C.OOS_DAYS} μέρες, που δεν χρησιμοποιήθηκαν πουθενά.", "",
@@ -245,6 +246,13 @@ def report(all_res):
                      f"PF {pf_str(r['oos']['profit_factor'])}, {r['oos']['trades']} trades.")
     else:
         L.append("- **Καμία στρατηγική δεν πέρασε το κριτήριο out-of-sample. Δεν αξίζει live bot με αυτούς τους κανόνες.**")
+    for res in all_res:
+        for key, r in res["strategies"].items():
+            m = r["oos"]
+            if key != "buyhold" and m["trades"] < C.MIN_OOS_TRADES and m["total_return_pct"] > 0 \
+                    and m["profit_factor"] >= C.MIN_OOS_PROFIT_FACTOR:
+                L.append(f"- {r['name']} ({res['timeframe']}): θετική αλλά με μόνο {m['trades']} trades — "
+                         "**αδύνατο να κριθεί** στατιστικά (όχι «περνάει»).")
     L += ["", "## Οι στρατηγικές", ""]
     for key, r in all_res[0]["strategies"].items():
         L.append(f"- **{r['name']}**: {r['description']}")
@@ -252,19 +260,25 @@ def report(all_res):
     return "\n".join(L), winners
 
 
-def main():
+TITLES = {"intraday": "Αποτελέσματα backtest — Υπόθεση 1: intraday (5′/15′)",
+          "trend": "Αποτελέσματα backtest — Υπόθεση 2: trend following (4ω/ημέρα)"}
+
+
+def main(suite="intraday"):
+    cfg = C.SUITES[suite]
     RESULTS.mkdir(exist_ok=True)
-    all_res = [r for r in (run_timeframe(tf) for tf in C.TIMEFRAMES) if r]
+    strats = [S.BY_KEY[k] for k in cfg["strategies"]]
+    all_res = [r for r in (run_timeframe(tf, strats) for tf in cfg["timeframes"]) if r]
     if not all_res:
         sys.exit("Δεν βρέθηκαν δεδομένα")
-    md, winners = report(all_res)
-    (RESULTS / "BACKTEST.md").write_text(md)
+    md, winners = report(all_res, TITLES.get(suite, suite))
+    (RESULTS / f"{cfg['out']}.md").write_text(md)
     payload = {"generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                "costs": {"fee": C.FEE_PER_SIDE, "slippage": C.SLIPPAGE_PER_SIDE},
                "winners": [{"timeframe": tf, "strategy": k} for tf, k, _ in winners], "results": all_res}
-    (RESULTS / "backtest.json").write_text(json.dumps(payload, ensure_ascii=False))
+    (RESULTS / f"{cfg['out'].lower()}.json").write_text(json.dumps(payload, ensure_ascii=False))
     print(md)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1] if len(sys.argv) > 1 else "intraday")

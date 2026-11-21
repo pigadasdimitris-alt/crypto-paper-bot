@@ -29,11 +29,11 @@ jobs:
           pip install -q pytest
           python -m pytest -q
 
-      - name: Λήψη ιστορικών κεριών
-        run: python -m bot.history
+      - name: Λήψη ιστορικών κεριών (υπόθεση 2 — 4ω/ημέρα)
+        run: python -m bot.history trend
 
-      - name: Backtest
-        run: python -m bot.backtest
+      - name: Backtest (υπόθεση 2)
+        run: python -m bot.backtest trend
 
       - name: Commit αποτελεσμάτων
         run: |

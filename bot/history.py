@@ -23,7 +23,8 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 RESULTS = ROOT / "results"
 UA = {"User-Agent": "crypto-paper-bot/1.0 (paper trading research)"}
-TF_SEC = {"5m": 300, "15m": 900, "1h": 3600, "1d": 86400}
+TF_SEC = {"5m": 300, "15m": 900, "1h": 3600, "4h": 14400, "1d": 86400}
+COINBASE_OK = {60, 300, 900, 3600, 21600, 86400}
 
 
 def _get(url, retries=3, binary=False):
@@ -108,6 +109,26 @@ def coinbase(sym, tf, start, today, granularity=None):
     return rows
 
 
+def resample(rows, sec):
+    """Συνένωση μικρότερων κεριών σε κεριά των sec δευτερολέπτων (π.χ. 1ω -> 4ω)."""
+    out = {}
+    for t, o, h, l, c, v in sorted(rows):
+        k = t - t % (sec * 1000)
+        if k not in out:
+            out[k] = [k, o, h, l, c, v]
+        else:
+            b = out[k]
+            b[2], b[3], b[4], b[5] = max(b[2], h), min(b[3], l), c, b[5] + v
+    return [out[k] for k in sorted(out)]
+
+
+def coinbase_tf(sym, tf, start, today):
+    g = TF_SEC[tf]
+    if g in COINBASE_OK:
+        return coinbase(sym, tf, start, today)
+    return resample(coinbase(sym, "1h", start, today), g)
+
+
 def clean(rows, tf):
     """Ταξινόμηση, αφαίρεση διπλών και χαλασμένων κεριών. Επιστρέφει (rows, στατιστικά)."""
     by_t = {}
@@ -152,33 +173,34 @@ def write_csv(path, rows):
         w.writerows(rows)
 
 
-def main():
+def main(suite="intraday"):
+    cfg = C.SUITES[suite]
     DATA.mkdir(exist_ok=True)
     RESULTS.mkdir(exist_ok=True)
-    start = date.fromisoformat(C.HISTORY_START)
+    start = date.fromisoformat(cfg["start"])
     today = datetime.now(timezone.utc).date()
     report = {"generated": datetime.now(timezone.utc).isoformat(timespec="seconds"), "series": {}}
     for sym in C.SYMBOLS:
-        for tf in C.TIMEFRAMES:
+        for tf in cfg["timeframes"]:
             rows, missing = binance_vision(sym, tf, start, today)
             source = "data.binance.vision"
             if missing > 1 or len(rows) < 1000:
                 print(f"{sym} {tf}: binance.vision απέτυχε ({missing} μήνες λείπουν) -> Coinbase", flush=True)
-                rows, source = coinbase(sym, tf, start, today), "coinbase"
+                rows, source = coinbase_tf(sym, tf, start, today), "coinbase"
             rows, stats = clean(rows, tf)
             stats["source"] = source
             if rows:
                 stats["from"] = datetime.fromtimestamp(rows[0][0] / 1000, timezone.utc).isoformat()
                 stats["to"] = datetime.fromtimestamp(rows[-1][0] / 1000, timezone.utc).isoformat()
-            if tf == C.TIMEFRAMES[0]:
+            if tf == cfg["timeframes"][0]:
                 stats["cross_check_coinbase"] = cross_check(sym, rows, start, today)
             write_csv(DATA / f"{sym}_{tf}.csv", rows)
             report["series"][f"{sym}_{tf}"] = stats
             print(sym, tf, json.dumps(stats, ensure_ascii=False), flush=True)
-    (RESULTS / "data_check.json").write_text(json.dumps(report, ensure_ascii=False, indent=1))
+    (RESULTS / ("data_check.json" if suite == "intraday" else f"data_check_{suite}.json")).write_text(json.dumps(report, ensure_ascii=False, indent=1))
     if any(s["bars"] < 1000 for s in report["series"].values()):
         sys.exit("Ανεπαρκή δεδομένα")
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1] if len(sys.argv) > 1 else "intraday")

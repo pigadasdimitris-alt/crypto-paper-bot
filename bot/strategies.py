@@ -103,5 +103,81 @@ class EmaTrend(Strategy):
         return a is not None and b is not None and a < b
 
 
+# ---------------- Υπόθεση 2: trend following σε κεριά 4ω / ημέρας ----------------
+# Χωρίς σταθερό στόχο: τα κέρδη «τρέχουν» και η έξοδος γίνεται με σήμα ή stop.
+
+NO_TARGET = 1e9
+
+
+class Donchian(Strategy):
+    key = "donchian"
+    name = "Donchian 20/10 (Turtle)"
+    description = ("Αγορά όταν το κλείσιμο σπάει το υψηλό των 20 προηγούμενων μπαρών. Έξοδος όταν το κλείσιμο "
+                   "πέσει κάτω από το χαμηλό των 10 προηγούμενων. Αρχικό stop 2×ATR, χωρίς στόχο.")
+    stop_atr, target_atr, max_hold_bars = 2.0, NO_TARGET, 10 ** 9
+
+    def prepare(self, bars):
+        ind = super().prepare(bars)
+        ind["hh20"] = I.highest_prev(bars["h"], 20)
+        ind["ll10"] = I.lowest_prev(bars["l"], 10)
+        return ind
+
+    def entry(self, ind, i):
+        hh = ind["hh20"][i]
+        return hh is not None and ind["c"][i] > hh
+
+    def exit_signal(self, ind, i):
+        ll = ind["ll10"][i]
+        return ll is not None and ind["c"][i] < ll
+
+
+class EmaSlow(Strategy):
+    key = "ema_slow"
+    name = "Διασταύρωση EMA 20/50"
+    description = ("Αγορά όταν η EMA20 περνά πάνω από την EMA50, έξοδος όταν πέσει κάτω. "
+                   "Stop 3×ATR, χωρίς στόχο.")
+    stop_atr, target_atr, max_hold_bars = 3.0, NO_TARGET, 10 ** 9
+
+    def prepare(self, bars):
+        ind = super().prepare(bars)
+        ind["e20"] = I.ema(bars["c"], 20)
+        ind["e50"] = I.ema(bars["c"], 50)
+        return ind
+
+    def entry(self, ind, i):
+        if i < 1:
+            return False
+        a0, b0, a1, b1 = ind["e20"][i - 1], ind["e50"][i - 1], ind["e20"][i], ind["e50"][i]
+        return None not in (a0, b0, a1, b1) and a0 <= b0 and a1 > b1
+
+    def exit_signal(self, ind, i):
+        a, b = ind["e20"][i], ind["e50"][i]
+        return a is not None and b is not None and a < b
+
+
+class Sma50(Strategy):
+    key = "sma50"
+    name = "Πάνω από SMA50"
+    description = ("Αγορά όταν το κλείσιμο περνά πάνω από τον μέσο όρο 50 μπαρών, έξοδος όταν κλείσει κάτω. "
+                   "Stop 3×ATR, χωρίς στόχο.")
+    stop_atr, target_atr, max_hold_bars = 3.0, NO_TARGET, 10 ** 9
+
+    def prepare(self, bars):
+        ind = super().prepare(bars)
+        ind["sma50"] = I.sma(bars["c"], 50)
+        return ind
+
+    def entry(self, ind, i):
+        if i < 1:
+            return False
+        m0, m1 = ind["sma50"][i - 1], ind["sma50"][i]
+        return m0 is not None and m1 is not None and ind["c"][i - 1] <= m0 and ind["c"][i] > m1
+
+    def exit_signal(self, ind, i):
+        m = ind["sma50"][i]
+        return m is not None and ind["c"][i] < m
+
+
 ALL = [Breakout(), MeanReversion(), EmaTrend()]
-BY_KEY = {s.key: s for s in ALL}
+TREND = [Donchian(), EmaSlow(), Sma50()]
+BY_KEY = {s.key: s for s in ALL + TREND}
