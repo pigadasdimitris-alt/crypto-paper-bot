@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crypto Paper Bot</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Crypto Bot">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#07090d">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: trading terminal at night — calm, exact, the number first
+   IDEA: a cockpit instrument panel; every card is a gauge
+   PICTURE: full-width equity curve with glow, stop→target tracks for open trades
+   COLOUR: near-black ground, profit mint, loss coral, ice-blue for neutral data
+   TYPE: Manrope for text, JetBrains Mono for every figure */
+:root{
+  --bg:#07090d; --bg2:#0c1017; --card:#111620; --card2:#151b27; --line:#1e2633; --line2:#2a3444;
+  --ink:#eef2f7; --ink2:#a9b4c4; --muted:#6b778a;
+  --up:#3ee39a; --up2:rgba(62,227,154,.14); --down:#ff6b6b; --down2:rgba(255,107,107,.14);
+  --ice:#7cc4ff; --ice2:rgba(124,196,255,.14); --gold:#ffd166;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;min-width:0}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:radial-gradient(1200px 500px at 50% -200px,#13202f 0%,var(--bg) 60%) fixed,var(--bg);
+  color:var(--ink);font:15px/1.5 Manrope,-apple-system,system-ui,sans-serif;overflow-x:clip;
+  padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 48px max(14px,env(safe-area-inset-left))}
+.wrap{max-width:860px;margin:0 auto}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--ink2)} .mut{color:var(--muted)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 18px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:-.01em}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#1b2a3a,#0f1620);border:1px solid var(--line2);display:grid;place-items:center}
+.logo svg{width:20px;height:20px}
+.status{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);background:var(--card);border:1px solid var(--line);padding:6px 10px;border-radius:99px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 0 rgba(62,227,154,.6);animation:pulse 2s infinite}
+.dot.warn{background:var(--gold);animation:none}.dot.bad{background:var(--down);animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(62,227,154,0)}100%{box-shadow:0 0 0 0 rgba(62,227,154,0)}}
+.hero{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:20px;padding:18px 16px 10px;margin-bottom:12px;position:relative;overflow:hidden}
+.hero .lbl{font-size:13px;color:var(--muted);font-weight:600}
+.eq{font:700 clamp(40px,11vw,60px)/1.02 var(--mono);letter-spacing:-.03em;margin:4px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{font:600 12.5px var(--mono);padding:4px 9px;border-radius:8px;background:var(--line);white-space:nowrap}
+.chip.up{background:var(--up2)}.chip.down{background:var(--down2)}
+.tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:3px;width:max-content;margin-left:auto}
+.tabs button{all:unset;cursor:pointer;font:600 12px Manrope,system-ui,sans-serif;color:var(--muted);padding:6px 11px;border-radius:7px;min-height:20px}
+.tabs button.on{background:var(--card2);color:var(--ink)}
+.tabs button:focus-visible,.filters button:focus-visible,.more:focus-visible{outline:2px solid var(--ice)}
+.chartbox{position:relative;height:190px;margin:8px -6px 0}
+.chartbox svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+@media(min-width:640px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.g{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 13px;display:flex;flex-direction:column;gap:2px}
+.g .v{font:700 21px var(--mono);letter-spacing:-.02em}
+.g .k{font-size:12.5px;color:var(--muted);font-weight:600}
+.g .s{font-size:12px;color:var(--ink2)}
+.ringrow{display:flex;align-items:center;gap:10px}
+.ring{width:44px;height:44px;flex:none}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.ph h2{margin:0;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+.ph h2 svg{width:17px;height:17px;stroke:var(--ice)}
+.ph .note{font-size:12px;color:var(--muted)}
+.bars{position:relative;height:150px}
+.bars svg{position:absolute;inset:0;width:100%;height:100%}
+.empty{color:var(--muted);font-size:14px;padding:6px 2px}
+.pos{padding:12px 0;border-top:1px solid var(--line)}
+.pos:first-child{border-top:0;padding-top:2px}
+.prow{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.pname{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pmeta{font-size:12px;color:var(--muted)}
+.big{font:700 18px var(--mono)}
+.track{position:relative;height:8px;border-radius:99px;margin:12px 0 6px;
+  background:linear-gradient(90deg,var(--down2) 0%,var(--line) 33%,var(--line) 66%,var(--up2) 100%)}
+.track .zero{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--line2)}
+.track .peak{position:absolute;top:-2px;width:2px;height:12px;background:var(--gold);opacity:.8}
+.track .cur{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);border:3px solid var(--bg);box-shadow:0 0 12px currentColor}
+.tlbl{display:flex;justify-content:space-between;font:500 11px var(--mono);color:var(--muted)}
+.filters{display:flex;gap:6px}
+.filters button{all:unset;cursor:pointer;font:600 12px Manrope,system-ui,sans-serif;padding:6px 10px;border-radius:8px;border:1px solid var(--line);color:var(--ink2)}
+.filters button.on{background:var(--ice2);border-color:transparent;color:var(--ice)}
+.tr{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.tr:first-child{border-top:0}
+.tr .side{align-self:stretch;border-radius:4px;background:var(--line2)}
+.tr.w .side{background:var(--up)}.tr.l .side{background:var(--down)}
+.tr .r{text-align:right}
+.tr .r .num{display:block;font-weight:700}
+.more{all:unset;cursor:pointer;display:block;width:100%;text-align:center;font:600 13px Manrope,system-ui,sans-serif;color:var(--ice);padding:10px 0 2px}
+.hb{padding:7px 0}
+.hb .t{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}
+.hb .bar{height:7px;border-radius:99px;background:var(--bg2);margin-top:6px;overflow:hidden}
+.hb .bar i{display:block;height:100%;border-radius:99px}
+.funnel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.fstep{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+.fstep b{display:block;font:700 19px var(--mono)}
+.fstep span{font-size:11.5px;color:var(--muted)}
+.two{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media(min-width:720px){.two{grid-template-columns:repeat(2,minmax(0,1fr))}.two .panel{margin-bottom:0}}
+.log{font:12px/1.65 var(--mono);color:var(--ink2);max-height:280px;overflow:auto}
+.log .t{color:var(--muted)}
+.log .b{color:var(--ice)} .log .sw{color:var(--up)} .log .sl{color:var(--down)} .log .wa{color:var(--gold)}
+footer{font-size:12px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.7}
+footer a{color:var(--ice);text-decoration:none}
+.err{background:var(--down2);color:var(--down);padding:10px 12px;border-radius:12px;font-size:13px;margin-bottom:12px;display:none}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+.coin{padding:11px 0;border-top:1px solid var(--line)}
+.coin:first-child{border-top:0;padding-top:2px}
+.lvl{position:relative;height:6px;border-radius:99px;background:var(--bg2);margin:9px 0 5px}
+.lvl i{position:absolute;top:0;bottom:0;left:0;border-radius:99px;background:var(--ice);opacity:.55}
+.lvl b{position:absolute;top:-4px;width:2px;height:14px;background:var(--up)}
+.tag{font:600 11px Manrope,system-ui,sans-serif;padding:3px 8px;border-radius:7px;background:var(--line);color:var(--ink2)}
+.tag.in{background:var(--up2);color:var(--up)}
+.track .ext{position:absolute;top:-4px;width:2px;height:16px;background:var(--ice)}
+.kv{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#3ee39a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 8-9"/></svg></div>
+      Crypto Paper Bot
+    </div>
+    <div class="status"><span class="dot" id="dot"></span><span id="st">Σύνδεση…</span></div>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <section class="hero">
+    <div class="lbl" id="hlbl">Συνολική αξία</div>
+    <div class="eq num" id="eq">—</div>
+    <div class="chips" id="chips"></div>
+    <div class="tabs" id="tabs">
+      <button data-r="6">6ω</button><button data-r="24">24ω</button><button data-r="0" class="on">Όλα</button>
+    </div>
+    <div class="chartbox"><svg id="curve"></svg></div>
+  </section>
+
+  <div class="grid" id="gauges"></div>
+
+  <section class="panel">
+    <div class="ph"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Ανοιχτά τώρα</h2><span class="note" id="opennote"></span></div>
+    <div id="open"></div>
+  </section>
+
+  <section class="panel">
+    <div class="ph"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Σήματα 4ω</h2><span class="note" id="nextbar"></span></div>
+    <div id="coins"></div>
+  </section>
+
+  <section class="panel">
+    <div class="ph"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 20V10M10 20V4M15 20v-7M20 20V8"/></svg>Αποτέλεσμα ανά trade</h2><span class="note">τελευταία 40</span></div>
+    <div class="bars"><svg id="pnlbars"></svg></div>
+  </section>
+
+  <section class="panel">
+    <div class="ph"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Ιστορικό trades</h2>
+      <div class="filters" id="filters"><button data-f="all" class="on">Όλα</button><button data-f="w">Κέρδη</button><button data-f="l">Ζημιές</button></div></div>
+    <div id="closed"></div>
+  </section>
+
+  <div class="two">
+    <section class="panel">
+      <div class="ph"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>Πώς έκλεισαν</h2></div>
+      <div id="exits"></div>
+    </section>
+    <section class="panel">
+      <div class="ph"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg>Έλεγχος τιμών</h2><span class="note">Coinbase + Kraken</span></div>
+      <div id="checks"></div>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:12px">
+    <div class="ph"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 4h14v16H5zM9 8h6M9 12h6M9 16h3"/></svg>Ημερολόγιο</h2><span class="note">ζωντανά</span></div>
+    <div class="log" id="log"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+{
+const REPO = "https://github.com/pigadasdimitris-alt/crypto-paper-bot";
+const RAW = "https://raw.githubusercontent.com/pigadasdimitris-alt/crypto-paper-bot/main/docs/";
+const SRC = location.hash === "#local" ? "state.json" : RAW + "state.json";
+const COST = 0.0015, BAR = 4*3600e3, SYMS = ["BTC","ETH","SOL"];
+const $ = id => document.getElementById(id);
+const tz = "Europe/Athens";
+const T = s => new Date(s).getTime();
+const fT = s => s ? new Date(s).toLocaleString("el-GR",{timeZone:tz,day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "—";
+const fH = s => s ? new Date(s).toLocaleTimeString("el-GR",{timeZone:tz,hour:"2-digit",minute:"2-digit"}) : "—";
+const fD = s => new Date(s).toLocaleDateString("el-GR",{timeZone:tz,day:"2-digit",month:"2-digit"});
+const usd = (v,sign=true) => (v>0&&sign?"+":v<0?"−":"") + "$" + Math.abs(v).toFixed(2);
+const px = v => "$" + (v>=1000 ? v.toLocaleString("en-US",{maximumFractionDigits:0}) : v.toFixed(2));
+const pct = v => (v>0?"+":v<0?"−":"") + Math.abs(v).toFixed(1) + "%";
+const dur = m => m < 60 ? Math.round(m)+"′" : m < 2880 ? (m/60).toFixed(m<600?1:0)+"ω" : (m/1440).toFixed(1)+" μ.";
+const cls = v => v>0.004 ? "up" : v<-0.004 ? "down" : "flat";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let ST = null, range = 0, filt = "all", showAll = false;
+
+const posValue = p => p.qty*p.last_price*(1-COST);
+const equity = st => st.balance + st.positions.reduce((a,p)=>a+posValue(p),0);
+
+function stats(st){
+  const c = st.closed, w = c.filter(t=>t.pnl>0), l = c.filter(t=>t.pnl<=0);
+  const gw = w.reduce((a,t)=>a+t.pnl,0), gl = -l.reduce((a,t)=>a+t.pnl,0);
+  let peak = st.start_balance, mdd = 0;
+  for(const [,v] of st.equity_history){ peak = Math.max(peak,v); mdd = Math.max(mdd,(peak-v)/peak); }
+  return {
+    n:c.length, w:w.length, wr: c.length? w.length/c.length : 0,
+    pf: gl>0 ? gw/gl : (gw>0 ? Infinity : 0),
+    exp: c.length ? (gw-gl)/c.length : 0,
+    avgW: w.length? gw/w.length:0, avgL: l.length? -gl/l.length:0,
+    mdd, hold: c.length ? c.reduce((a,t)=>a+t.hold_min,0)/c.length : 0,
+    best: c.reduce((m,t)=>Math.max(m,t.pnl),0), worst: c.reduce((m,t)=>Math.min(m,t.pnl),0),
+    today: st.daily.realized, todayN: st.daily.entries
+  };
+}
+
+/* trend following: ~30% επιτυχία είναι φυσιολογικό — λίγα μεγάλα κέρδη, πολλές μικρές ζημιές */
+function ring(fr){
+  const r=18, C=2*Math.PI*r, col = fr>=.4 ? "var(--up)" : fr>=.25 ? "var(--gold)" : "var(--down)";
+  return `<svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/>
+  <circle cx="22" cy="22" r="${r}" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round"
+   stroke-dasharray="${(C*fr).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 22 22)"/></svg>`;
+}
+
+function drawCurve(){
+  const svg = $("curve"); if(!ST) return;
+  const W = svg.clientWidth, H = svg.clientHeight; if(!W) return;
+  let h = ST.equity_history;
+  if(range){ const cut = Date.now()-range*3600e3; h = h.filter(x=>T(x[0])>=cut); }
+  if(h.length < 2){ svg.innerHTML = `<text x="${W/2}" y="${H/2}" fill="#6b778a" font-size="13" text-anchor="middle" font-family="Manrope,system-ui,sans-serif">Λίγα δεδομένα ακόμα</text>`; return; }
+  const start = ST.start_balance, ys = h.map(x=>x[1]).concat(range?[]:[start]);
+  let lo = Math.min(...ys), hi = Math.max(...ys); const pad=(hi-lo)*.12||1; lo-=pad; hi+=pad;
+  const t0 = T(h[0][0]), t1 = T(h[h.length-1][0]), long = t1-t0 > 36*3600e3;
+  const L=6, R=W-44, top=10, bot=H-22;
+  const x = t => L + (t-t0)/Math.max(t1-t0,1)*(R-L);
+  const y = v => bot - (v-lo)/(hi-lo)*(bot-top);
+  const pts = h.map(p=>[x(T(p[0])), y(p[1])]);
+  const d = pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join("");
+  const last = h[h.length-1][1], first = range ? h[0][1] : start, col = last>=first ? "#3ee39a" : "#ff6b6b";
+  const lastP = pts[pts.length-1];
+  const ticks = [hi-pad, (hi+lo)/2, lo+pad];
+  const nt = W<520 ? 3 : 5, xt = [];
+  for(let i=0;i<nt;i++){ const t=t0+(t1-t0)*i/(nt-1), iso=new Date(t).toISOString(); xt.push(`<text x="${x(t)}" y="${H-4}" fill="#6b778a" font-size="10.5" font-family="JetBrains Mono,ui-monospace,monospace" text-anchor="${i===0?"start":i===nt-1?"end":"middle"}">${long?fD(iso):fH(iso)}</text>`); }
+  svg.innerHTML = `
+   <defs><linearGradient id="gf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".32"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient>
+   <filter id="gl" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+   ${ticks.map(v=>`<line x1="${L}" x2="${R}" y1="${y(v)}" y2="${y(v)}" stroke="#1e2633"/><text x="${W-2}" y="${y(v)+4}" fill="#6b778a" font-size="10.5" font-family="JetBrains Mono,ui-monospace,monospace" text-anchor="end">$${v.toFixed(hi-lo<6?1:0)}</text>`).join("")}
+   ${!range && start>lo && start<hi ? `<line x1="${L}" x2="${R}" y1="${y(start)}" y2="${y(start)}" stroke="#a9b4c4" stroke-opacity=".5" stroke-dasharray="3 5"/>` : ""}
+   <path d="${d}L${lastP[0]},${bot}L${pts[0][0]},${bot}Z" fill="url(#gf)"/>
+   <path d="${d}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" filter="url(#gl)"/>
+   <circle cx="${lastP[0]}" cy="${lastP[1]}" r="4.5" fill="${col}" stroke="#07090d" stroke-width="2"/>
+   ${xt.join("")}`;
+}
+
+function drawBars(){
+  const svg = $("pnlbars"); if(!ST) return;
+  const W = svg.clientWidth, H = svg.clientHeight; if(!W) return;
+  const c = ST.closed.slice(-40);
+  if(!c.length){ svg.innerHTML = `<text x="${W/2}" y="${H/2}" fill="#6b778a" font-size="13" text-anchor="middle" font-family="Manrope,system-ui,sans-serif">Δεν έχει κλείσει trade ακόμα</text>`; return; }
+  const m = Math.max(...c.map(t=>Math.abs(t.pnl)), 0.5);
+  const mid = H/2, bw = Math.min(22, (W-8)/c.length - 3), gap = (W - bw*c.length)/(c.length+1);
+  svg.innerHTML = `<line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="#2a3444"/>` + c.map((t,i)=>{
+    const hgt = Math.max(2, Math.abs(t.pnl)/m*(mid-14)), X = gap + i*(bw+gap);
+    const Y = t.pnl>0 ? mid-hgt : mid, col = t.pnl>0 ? "#3ee39a" : "#ff6b6b";
+    return `<rect x="${X.toFixed(1)}" y="${Y.toFixed(1)}" width="${bw.toFixed(1)}" height="${hgt.toFixed(1)}" rx="3" fill="${col}" opacity=".9"><title>${esc(t.sym)} ${usd(t.pnl)}</title></rect>`;
+  }).join("") + `<text x="2" y="11" fill="#6b778a" font-size="10.5" font-family="JetBrains Mono,ui-monospace,monospace">+$${m.toFixed(2)}</text><text x="2" y="${H-3}" fill="#6b778a" font-size="10.5" font-family="JetBrains Mono,ui-monospace,monospace">−$${m.toFixed(2)}</text>`;
+}
+
+function renderClosed(){
+  const c = ST.closed.slice().reverse().filter(t => filt==="all" || (filt==="w" ? t.pnl>0 : t.pnl<=0));
+  const list = showAll ? c : c.slice(0,12);
+  $("closed").innerHTML = list.length ? list.map(t=>`
+    <div class="tr ${t.pnl>0?"w":"l"}"><div class="side"></div>
+      <div><div class="pname">${esc(t.sym)} <span class="mut num" style="font-size:12px">${px(t.entry_market)} → ${px(t.exit_market)}</span></div>
+      <div class="pmeta">${fT(t.exit_time)} · ${dur(t.hold_min)} · ${esc(t.reason)} · κορυφή ${pct(t.peak_pct||0)}</div></div>
+      <div class="r"><span class="num ${cls(t.pnl)}">${usd(t.pnl)}</span><span class="num pmeta">${pct(t.pnl_pct)}</span></div></div>`).join("")
+    + (c.length>12 ? `<button class="more" id="more">${showAll?"Λιγότερα":"Όλα τα "+c.length}</button>` : "")
+    : `<div class="empty">Τίποτα εδώ ακόμα. Η στρατηγική κάνει λίγα trades — περίπου 1 ανά νόμισμα κάθε 12 μέρες.</div>`;
+  const mb = $("more"); if(mb) mb.onclick = () => { showAll=!showAll; renderClosed(); };
+}
+
+function renderOpen(st){
+  $("opennote").textContent = st.positions.length ? `${st.positions.length} ${st.positions.length===1?"θέση":"θέσεις"} · $${st.positions.reduce((a,p)=>a+posValue(p),0).toFixed(2)}` : "";
+  $("open").innerHTML = st.positions.length ? st.positions.map(p=>{
+    /* μπάρα: από το stop ως την κορυφή (ή +3 ATR) — η στρατηγική ΔΕΝ έχει σταθερό στόχο */
+    const lo = p.stop, hi = Math.max(p.peak_price, p.entry_market + 3*p.atr, p.last_price), span = hi-lo;
+    const at = v => Math.max(0, Math.min(100, (v-lo)/span*100));
+    const colr = p.last_pct>=0 ? "var(--up)" : "var(--down)";
+    const ex = p.exit_level && p.exit_level > lo ? `<span class="ext" style="left:${at(p.exit_level)}%" title="έξοδος καναλιού"></span>` : "";
+    return `<div class="pos"><div class="prow"><div style="min-width:0"><div class="pname">${esc(p.sym)} <span class="mut num" style="font-size:12px">${px(p.last_price)}</span></div>
+      <div class="pmeta">#${p.id} · αγορά ${fT(p.entry_time)} στα ${px(p.entry_market)} · ${dur((Date.now()-T(p.entry_time))/60000)}</div></div>
+      <div style="text-align:right"><div class="big ${cls(p.last_pct)}">${pct(p.last_pct)}</div><div class="pmeta num">${usd(posValue(p)-p.cost)}</div></div></div>
+      <div class="track"><span class="zero" style="left:${at(p.entry_market)}%"></span>${ex}<span class="peak" style="left:${at(p.peak_price)}%"></span>
+      <span class="cur" style="left:${at(p.last_price)}%;background:${colr};color:${colr}"></span></div>
+      <div class="tlbl"><span>stop ${px(p.stop)}</span><span>${p.exit_level?"έξοδος κάτω από "+px(p.exit_level):""}</span><span>κορυφή ${pct(p.peak_pct)}</span></div></div>`;
+  }).join("") : `<div class="empty">Καμία ανοιχτή θέση — περιμένει σπάσιμο υψηλού 20 κεριών 4ω.</div>`;
+}
+
+function renderCoins(st){
+  const nb = Math.ceil(Date.now()/BAR)*BAR, left = (nb-Date.now())/60000;
+  $("nextbar").textContent = `επόμενο κερί σε ${dur(left)} (${fH(new Date(nb).toISOString())})`;
+  $("coins").innerHTML = SYMS.map(sym=>{
+    const s = (st.signals||{})[sym], pr = ((st.prices||{})[sym]||{}).price, pos = st.positions.find(p=>p.sym===sym);
+    if(!s || !s.hh20) return `<div class="coin"><div class="prow"><b>${sym}</b><span class="mut">αναμονή για πρώτο κερί</span></div></div>`;
+    const cur = pr || s.close, lo = s.ll10, hi = s.hh20, span = Math.max(hi-lo, 1e-9);
+    const fill = Math.max(0, Math.min(100, (cur-lo)/span*100)), dist = 100*(hi/cur-1);
+    return `<div class="coin"><div class="prow"><div><b>${sym}</b> <span class="num">${px(cur)}</span></div>
+      ${pos ? `<span class="tag in">σε θέση</span>` : `<span class="tag">${dist>0 ? "σπάσιμο σε "+pct(dist) : "πάνω από το υψηλό"}</span>`}</div>
+      <div class="lvl"><i style="width:${fill.toFixed(1)}%"></i><b style="left:calc(100% - 2px)"></b></div>
+      <div class="tlbl"><span>χαμηλό 10: ${px(lo)}</span><span>υψηλό 20: ${px(hi)}</span></div></div>`;
+  }).join("");
+}
+
+function render(st){
+  ST = st;
+  const s = stats(st), eq = equity(st), start = st.start_balance, pnl = eq-start;
+  const age = (Date.now()-T(st.last_run))/60000;
+  $("dot").className = "dot" + (age>20 ? " bad" : age>10 ? " warn" : "");
+  $("st").textContent = age<1.5 ? "Ζωντανά · μόλις τώρα" : `Ενημέρωση πριν ${dur(age)}`;
+  $("hlbl").textContent = `Συνολική αξία · ${st.strategy ? st.strategy.name + " 4ω" : ""}`;
+  $("eq").innerHTML = `<span class="${cls(pnl)}">$${eq.toFixed(2)}</span>`;
+  $("chips").innerHTML =
+    `<span class="chip ${cls(pnl)}">${usd(pnl)} · ${pct(100*pnl/start)}</span>` +
+    `<span class="chip ${cls(s.today)}">Σήμερα ${usd(s.today)}</span>` +
+    `<span class="chip">Αρχή $${start.toFixed(0)}</span>`;
+  drawCurve();
+
+  const pf = s.pf===Infinity ? "∞" : s.pf.toFixed(2);
+  $("gauges").innerHTML = [
+    `<div class="g"><div class="ringrow">${ring(s.wr)}<div><div class="v">${s.n?Math.round(s.wr*100)+"%":"—"}</div><div class="k">Επιτυχία</div></div></div><div class="s">${s.w} από ${s.n} · backtest 27%</div></div>`,
+    `<div class="g"><div class="v ${s.pf>=1?"up":s.n?"down":""}">${s.n?pf:"—"}</div><div class="k">Profit factor</div><div class="s">πάνω από 1 = κερδίζει</div></div>`,
+    `<div class="g"><div class="v ${cls(s.exp)}">${s.n?usd(s.exp):"—"}</div><div class="k">Μέσο ανά trade</div><div class="s">μετά από κόστη</div></div>`,
+    `<div class="g"><div class="v down">${s.mdd?"−"+(s.mdd*100).toFixed(1)+"%":"0%"}</div><div class="k">Μέγιστη πτώση</div><div class="s">από την κορυφή</div></div>`,
+    `<div class="g"><div class="v"><span class="up">${usd(s.avgW)}</span></div><div class="k">Μέσο κέρδος</div><div class="s">καλύτερο ${usd(s.best)}</div></div>`,
+    `<div class="g"><div class="v"><span class="down">${usd(s.avgL)}</span></div><div class="k">Μέση ζημιά</div><div class="s">χειρότερο ${usd(s.worst)}</div></div>`,
+    `<div class="g"><div class="v">${s.hold?dur(s.hold):"—"}</div><div class="k">Μέση διάρκεια</div><div class="s">ανά trade</div></div>`,
+    `<div class="g"><div class="v">${s.todayN}</div><div class="k">Αγορές σήμερα</div><div class="s">${st.positions.length} ανοιχτές από 3</div></div>`
+  ].join("");
+
+  renderOpen(st);
+  renderCoins(st);
+  drawBars();
+  renderClosed();
+
+  const ex = {};
+  for(const t of st.closed){ const e = ex[t.reason] ||= {n:0,p:0}; e.n++; e.p += t.pnl; }
+  const exl = Object.entries(ex).sort((a,b)=>b[1].n-a[1].n), exm = exl.length ? exl[0][1].n : 1;
+  $("exits").innerHTML = exl.length ? exl.map(([r,e])=>`<div class="hb"><div class="t"><span>${esc(r)} <span class="mut">× ${e.n}</span></span><span class="num ${cls(e.p)}">${usd(e.p)}</span></div>
+    <div class="bar"><i style="width:${(100*e.n/exm).toFixed(0)}%;background:${e.p>=0?"var(--up)":"var(--down)"}"></i></div></div>`).join("")
+    : `<div class="empty">—</div>`;
+
+  const k = st.stats || {};
+  $("checks").innerHTML = [
+    ["Γύροι ελέγχου", k.cycles||0, ""],
+    ["Κεριά 4ω που ελέγχθηκαν", k.bars_checked||0, ""],
+    ["Τιμές που απορρίφθηκαν (διαφωνία)", k.price_rejects||0, (k.price_rejects?"wa":"")],
+    ["Απότομες αλλαγές που επιβεβαιώθηκαν", k.price_confirms||0, ""],
+    ["Κεριά χωρίς διασταύρωση", k.candle_rejects||0, (k.candle_rejects?"wa":"")]
+  ].map(([a,b,c])=>`<div class="kv"><span class="mut">${a}</span><span class="num ${c==="wa"?"":"flat"}" style="${c==="wa"?"color:var(--gold)":""}">${Number(b).toLocaleString("el-GR")}</span></div>`).join("")
+  + SYMS.map(sym=>{ const p=(st.prices||{})[sym]; return p ? `<div class="kv"><span class="mut">${sym} · ${esc(p.src)}</span><span class="num flat">${px(p.price)} · ${fH(p.t)}</span></div>` : ""; }).join("");
+
+  $("log").innerHTML = st.log.slice(-80).reverse().map(l=>{
+    const m = l.msg;
+    const c = m.startsWith("ΑΓΟΡΑ") ? "b" : m.startsWith("ΠΩΛΗΣΗ") ? (/—\s-\d/.test(m) ? "sl" : "sw") : (m.includes("διαφωνούν")||m.includes("απότομη")||m.includes("διασταύρωση")||m.includes("Σφάλμα")) ? "wa" : "";
+    return `<div><span class="t">${fT(l.t)}</span> <span class="${c}">${esc(m)}</span></div>`;
+  }).join("") || "—";
+
+  $("foot").innerHTML = `Εικονικό κεφάλαιο · ξεκίνησε ${fT(st.started_at)} · μόνο paper, καμία πραγματική εντολή<br>
+    <a href="${REPO}/blob/main/docs/trades.csv">Όλα τα trades</a> · <a href="${REPO}/blob/main/results/BACKTEST_TREND.md">Backtest</a> · <a href="${REPO}">Repo</a>`;
+}
+
+async function load(){
+  try{
+    const r = await fetch(SRC + "?t=" + Date.now(), {cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    render(await r.json());
+    $("err").style.display = "none";
+  }catch(e){
+    $("err").style.display = "block";
+    $("err").textContent = ST ? "Δεν ήρθαν νέα δεδομένα — δείχνω τα τελευταία." : "Δεν βρέθηκαν δεδομένα ακόμα — το bot δεν έχει ολοκληρώσει τον πρώτο γύρο.";
+    $("st").textContent = "Εκτός σύνδεσης";
+  }
+}
+
+$("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return;
+  range = +b.dataset.r; for(const x of $("tabs").children) x.classList.toggle("on", x===b); drawCurve(); });
+$("filters").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return;
+  filt = b.dataset.f; showAll = false; for(const x of $("filters").children) x.classList.toggle("on", x===b); renderClosed(); });
+const ro = new ResizeObserver(() => { drawCurve(); drawBars(); });
+ro.observe($("curve")); ro.observe($("pnlbars"));
+load(); setInterval(load, 60000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden) load(); });
+}
+</script>
+</body>
+</html>

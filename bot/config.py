@@ -33,3 +33,20 @@ MIN_OOS_PROFIT_FACTOR = 1.15
 # --- Live paper (Βήμα 2 — μόνο αν περάσει το backtest) ---
 START_BALANCE_USD = 70.0
 TIMEZONE = "Europe/Athens"
+
+# ---- Live paper bot: στρατηγική που πέρασε το backtest (Υπόθεση 2) ----
+LIVE_STRATEGY = "donchian"      # Donchian 20/10 σε κεριά 4ω — ΙΔΙΟΙ κανόνες με το backtest
+BAR_SECONDS = 4 * 3600
+ALLOC_FRACTION = 1 / 3          # όπως στο backtest: 1/3 της αξίας ανά νόμισμα
+MAX_OPEN_POSITIONS = 3          # το πολύ μία θέση ανά νόμισμα
+MAX_DAILY_LOSS_USD = 5.0        # αν χάσει τόσα σε μία μέρα (ώρα Ελλάδας), καμία νέα αγορά ως αύριο
+MIN_ORDER_USD = 5.0
+ACT_WINDOW_MIN = 90             # σήμα κεριού ισχύει μόνο αν το δούμε έως 90′ μετά το κλείσιμό του
+
+# ---- Προστασία από λάθος τιμές (μάθημα από το πρώτο bot) ----
+PRICE_TOLERANCE = 0.01          # Coinbase και Kraken πρέπει να συμφωνούν σε 1%, αλλιώς η τιμή αγνοείται
+MAX_JUMP = 0.08                 # αλλαγή >8% μέσα σε έναν γύρο από ΜΙΑ πηγή θέλει επιβεβαίωση στον επόμενο
+CANDLE_TOLERANCE = 0.01         # το κλείσιμο κεριού 4ω πρέπει να συμφωνεί στις δύο πηγές σε 1%
+
+POLL_SECONDS = 60
+SNAPSHOT_MINUTES = 10

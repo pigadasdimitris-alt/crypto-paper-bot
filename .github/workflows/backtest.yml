@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}          # χειροκίνητα από το κινητό: Actions → backtest → Run workflow
   push:
     branches: [main]
-    paths: ["bot/**", "tests/**", ".github/workflows/backtest.yml"]
+    paths: ["bot/backtest.py", "bot/strategies.py", "bot/indicators.py", "bot/history.py", ".github/workflows/backtest.yml"]
 
 permissions:
   contents: write
