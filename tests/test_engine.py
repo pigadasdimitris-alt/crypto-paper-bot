@@ -121,7 +121,7 @@ def test_entry_on_breakout_with_costs_and_sizing():
     assert E.on_bar(s, "BTC", bars, 200.0, now) == "αγορά"
     p = s["positions"][0]
     assert p["cost"] == pytest.approx(C.START_BALANCE_USD / 3)
-    assert p["qty"] == pytest.approx((70 / 3) / (200 * 1.0015))
+    assert p["qty"] == pytest.approx((C.START_BALANCE_USD / 3) / (200 * 1.0015))
     assert p["stop"] == pytest.approx(200 - 2 * E.bar_signals(bars)["atr"])
     # ίδιο κερί δεν ξαναελέγχεται
     assert E.on_bar(s, "BTC", bars, 200.0, now) == "ήδη ελέγχθηκε"
