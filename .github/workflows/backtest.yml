@@ -1,0 +1,45 @@
+name: backtest
+
+on:
+  workflow_dispatch: {}          # χειροκίνητα από το κινητό: Actions → backtest → Run workflow
+  push:
+    branches: [main]
+    paths: ["bot/**", "tests/**", ".github/workflows/backtest.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backtest
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tests
+        run: |
+          pip install -q pytest
+          python -m pytest -q
+
+      - name: Λήψη ιστορικών κεριών
+        run: python -m bot.history
+
+      - name: Backtest
+        run: python -m bot.backtest
+
+      - name: Commit αποτελεσμάτων
+        run: |
+          git config user.name "paper-bot"
+          git config user.email "paper-bot@users.noreply.github.com"
+          git add results
+          git diff --cached --quiet && exit 0
+          git commit -q -m "backtest: αποτελέσματα $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git push -q && break; git pull -q --rebase -X theirs; done
