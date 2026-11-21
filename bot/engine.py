@@ -57,6 +57,22 @@ def new_state(now):
     }
 
 
+def apply_new_capital(state, now):
+    """Αν άλλαξε το αρχικό κεφάλαιο στις ρυθμίσεις: νέα αρχή — αλλά ΜΟΝΟ αν δεν έχει γίνει κανένα trade,
+    ώστε να μη «σβηστεί» ποτέ πραγματικό ιστορικό."""
+    if state["start_balance"] == C.START_BALANCE_USD:
+        return False
+    if state["positions"] or state["closed"]:
+        log(state, now, f"Το κεφάλαιο στις ρυθμίσεις άλλαξε σε ${C.START_BALANCE_USD:.0f}, αλλά υπάρχουν trades — δεν αλλάζει")
+        return False
+    old = state["start_balance"]
+    state["start_balance"] = state["balance"] = C.START_BALANCE_USD
+    state["equity_history"] = []
+    state["started_at"] = iso(now)
+    log(state, now, f"Νέο εικονικό κεφάλαιο: ${C.START_BALANCE_USD:.0f} (από ${old:.0f})")
+    return True
+
+
 def log(state, now, msg):
     state["log"].append({"t": iso(now), "msg": msg})
     state["log"] = state["log"][-300:]

@@ -19,7 +19,9 @@ TRADES = DOCS / "trades.csv"
 
 def load_state(now):
     if STATE.exists():
-        return json.loads(STATE.read_text())
+        state = json.loads(STATE.read_text())
+        engine.apply_new_capital(state, now)
+        return state
     return engine.new_state(now)
 
 

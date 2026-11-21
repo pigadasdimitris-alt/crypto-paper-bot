@@ -31,7 +31,7 @@ MIN_OOS_TRADES = 30
 MIN_OOS_PROFIT_FACTOR = 1.15
 
 # --- Live paper (Βήμα 2 — μόνο αν περάσει το backtest) ---
-START_BALANCE_USD = 70.0
+START_BALANCE_USD = 200.0
 TIMEZONE = "Europe/Athens"
 
 # ---- Live paper bot: στρατηγική που πέρασε το backtest (Υπόθεση 2) ----
@@ -39,7 +39,7 @@ LIVE_STRATEGY = "donchian"      # Donchian 20/10 σε κεριά 4ω — ΙΔΙ�
 BAR_SECONDS = 4 * 3600
 ALLOC_FRACTION = 1 / 3          # όπως στο backtest: 1/3 της αξίας ανά νόμισμα
 MAX_OPEN_POSITIONS = 3          # το πολύ μία θέση ανά νόμισμα
-MAX_DAILY_LOSS_USD = 5.0        # αν χάσει τόσα σε μία μέρα (ώρα Ελλάδας), καμία νέα αγορά ως αύριο
+MAX_DAILY_LOSS_USD = 14.0       # (~7% του κεφαλαίου) αν χάσει τόσα σε μία μέρα (ώρα Ελλάδας), καμία νέα αγορά ως αύριο
 MIN_ORDER_USD = 5.0
 ACT_WINDOW_MIN = 90             # σήμα κεριού ισχύει μόνο αν το δούμε έως 90′ μετά το κλείσιμό του
 

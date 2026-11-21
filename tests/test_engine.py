@@ -120,7 +120,7 @@ def test_entry_on_breakout_with_costs_and_sizing():
     now = at_close(bars)
     assert E.on_bar(s, "BTC", bars, 200.0, now) == "αγορά"
     p = s["positions"][0]
-    assert p["cost"] == pytest.approx(70 / 3)
+    assert p["cost"] == pytest.approx(C.START_BALANCE_USD / 3)
     assert p["qty"] == pytest.approx((70 / 3) / (200 * 1.0015))
     assert p["stop"] == pytest.approx(200 - 2 * E.bar_signals(bars)["atr"])
     # ίδιο κερί δεν ξαναελέγχεται
@@ -192,7 +192,7 @@ def test_three_positions_use_all_capital_without_overdraft():
         E.on_bar(s, sym, bars, 200.0, now)
     assert len(s["positions"]) == 3
     assert s["balance"] >= -1e-9
-    assert E.equity(s) == pytest.approx(70 * (1 - E.COST) / (1 + E.COST), rel=1e-3)
+    assert E.equity(s) == pytest.approx(C.START_BALANCE_USD * (1 - E.COST) / (1 + E.COST), rel=1e-3)
 
 
 def test_daily_roll_and_snapshot():
@@ -204,3 +204,16 @@ def test_daily_roll_and_snapshot():
     E.snapshot(s, T0 + timedelta(minutes=1))
     E.snapshot(s, T0 + timedelta(minutes=11))
     assert len(s["equity_history"]) == 2
+
+
+def test_new_capital_only_without_trades():
+    s = st()
+    s["start_balance"] = s["balance"] = 70.0
+    s["equity_history"] = [["x", 70.0]]
+    assert E.apply_new_capital(s, T0)
+    assert s["start_balance"] == s["balance"] == C.START_BALANCE_USD and s["equity_history"] == []
+    s2 = st()
+    s2["start_balance"] = 70.0
+    s2["closed"] = [{"pnl": 1}]
+    assert not E.apply_new_capital(s2, T0)
+    assert s2["start_balance"] == 70.0
