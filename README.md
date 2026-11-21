@@ -2,11 +2,22 @@
 
 **Μόνο εικονικά χρήματα (paper).** Κανένα πορτοφόλι, κανένα API key, καμία πραγματική εντολή.
 
-Βήμα 1: backtest τριών απλών intraday στρατηγικών σε BTC, ETH, SOL (κεριά 15′ και 5′, ~3 χρόνια),
-με κόστη 0,1% fee + 0,05% slippage ανά πλευρά. Κρίνουμε ΜΟΝΟ από τους τελευταίους 6 μήνες (out-of-sample).
+Στρατηγική: **Donchian 20/10 (Turtle)** σε κεριά 4ω, BTC/ETH/SOL. Αγορά όταν το κλείσιμο σπάει το υψηλό των 20 προηγούμενων μπαρών. Έξοδος όταν το κλείσιμο πέσει κάτω από το χαμηλό των 10 προηγούμενων. Αρχικό stop 2×ATR, χωρίς στόχο. Κόστη 0.1% fee + 0.05% slippage ανά πλευρά. Τιμές από Coinbase + Kraken (πρέπει να συμφωνούν).
 
-- Υπόθεση 1 (intraday 5′/15′): [results/BACKTEST.md](results/BACKTEST.md) — **απέτυχε**
-- Υπόθεση 2 (trend following 4ω/ημέρα, από 09/2020): [results/BACKTEST_TREND.md](results/BACKTEST_TREND.md)
-- Έλεγχος δεδομένων: [results/data_check.json](results/data_check.json)
+## Σύνοψη live paper
 
-Βήμα 2 (live paper bot + dashboard) γίνεται **μόνο** αν κάποια στρατηγική περάσει το κριτήριο out-of-sample.
+| | |
+|---|---|
+| Αρχικό κεφάλαιο | $70.00 |
+| **Τώρα** | **$70.00** (+0.00$, +0.0%) |
+| Κλειστά trades | 0 (κερδισμένα 0, 0%) · PF - · μέσο +0.00$ |
+| Ανοιχτά τώρα | 0 |
+| Ξεκίνησε | 21/11 20:40 |
+| Τελευταίος έλεγχος | 21/11 20:44 |
+
+## Backtests
+
+- Υπόθεση 1 (intraday 5′/15′): [results/BACKTEST.md](results/BACKTEST.md) — απέτυχε
+- Υπόθεση 2 (4ω/ημέρα): [results/BACKTEST_TREND.md](results/BACKTEST_TREND.md) — πέρασε μόνο το Donchian 4ω
+
+_Ενημερώθηκε αυτόματα: 21/11/2026 20:44_
