@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write                 # για να ξεκινά μόνο του τον επόμενο γύρο
 
 concurrency:
   group: paper-bot
@@ -39,3 +40,11 @@ jobs:
           git config user.name "paper-bot"
           git config user.email "paper-bot@users.noreply.github.com"
           python -m bot.run
+
+      # Το cron του GitHub συχνά καθυστερεί ώρες ή παραλείπει γύρους.
+      # Γι' αυτό κάθε γύρος ξεκινά αμέσως τον επόμενο (αλυσίδα). Το cron μένει ως εφεδρεία.
+      - name: Επόμενος γύρος
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run bot.yml --ref main
