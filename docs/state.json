@@ -22,8 +22,8 @@
    "stop": 59898.239269573955,
    "stop_pct": -4.65,
    "exit_level": 58649.8,
-   "last_price": 61048.39,
-   "last_pct": -2.82,
+   "last_price": 61137.23,
+   "last_pct": -2.68,
    "peak_price": 62820.71,
    "peak_pct": 0.0
   },
@@ -39,8 +39,8 @@
    "stop": 1679.8679459219113,
    "stop_pct": -5.21,
    "exit_level": 1645.0,
-   "last_price": 1709.22,
-   "last_pct": -3.56,
+   "last_price": 1709.8,
+   "last_pct": -3.52,
    "peak_price": 1774.92,
    "peak_pct": 0.15
   },
@@ -56,8 +56,8 @@
    "stop": 71.72330392336458,
    "stop_pct": -5.25,
    "exit_level": 68.59,
-   "last_price": 71.94,
-   "last_pct": -4.97,
+   "last_price": 72.04,
+   "last_pct": -4.83,
    "peak_price": 75.75,
    "peak_pct": 0.07
   }
@@ -65,18 +65,18 @@
  "closed": [],
  "prices": {
   "BTC": {
-   "price": 61048.39,
-   "t": "2026-11-23T22:35:15Z",
+   "price": 61137.23,
+   "t": "2026-11-23T22:40:15Z",
    "src": "coinbase+kraken"
   },
   "ETH": {
-   "price": 1709.22,
-   "t": "2026-11-23T22:35:15Z",
+   "price": 1709.8,
+   "t": "2026-11-23T22:40:15Z",
    "src": "coinbase+kraken"
   },
   "SOL": {
-   "price": 71.94,
-   "t": "2026-11-23T22:35:15Z",
+   "price": 72.04,
+   "t": "2026-11-23T22:40:15Z",
    "src": "coinbase+kraken"
   }
  },
@@ -118,7 +118,7 @@
   "entries": 0
  },
  "stats": {
-  "cycles": 2225,
+  "cycles": 2230,
   "price_rejects": 0,
   "price_confirms": 0,
   "bars_checked": 39,
@@ -1000,6 +1000,10 @@
   [
    "2026-11-23T22:29:15Z",
    192.4326
+  ],
+  [
+   "2026-11-23T22:39:15Z",
+   191.9178
   ]
  ],
  "log": [
@@ -1164,6 +1168,6 @@
    "msg": "SOL: κερί 4ω έκλεισε $73.00 — κράτημα (σπάσιμο πάνω από $78.48, έξοδος κάτω από $68.59)"
   }
  ],
- "last_run": "2026-11-23T22:35:16Z",
+ "last_run": "2026-11-23T22:40:16Z",
  "next_id": 4
 }
