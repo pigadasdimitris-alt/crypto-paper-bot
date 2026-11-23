@@ -22,7 +22,7 @@
    "stop": 59898.239269573955,
    "stop_pct": -4.65,
    "exit_level": 58649.8,
-   "last_price": 62037.35,
+   "last_price": 62038.36,
    "last_pct": -1.25,
    "peak_price": 62820.71,
    "peak_pct": 0.0
@@ -39,8 +39,8 @@
    "stop": 1679.8679459219113,
    "stop_pct": -5.21,
    "exit_level": 1645.0,
-   "last_price": 1757.22,
-   "last_pct": -0.85,
+   "last_price": 1761.7,
+   "last_pct": -0.6,
    "peak_price": 1774.92,
    "peak_pct": 0.15
   },
@@ -56,8 +56,8 @@
    "stop": 71.72330392336458,
    "stop_pct": -5.25,
    "exit_level": 68.59,
-   "last_price": 74.06,
-   "last_pct": -2.17,
+   "last_price": 74.16,
+   "last_pct": -2.03,
    "peak_price": 75.75,
    "peak_pct": 0.07
   }
@@ -65,18 +65,18 @@
  "closed": [],
  "prices": {
   "BTC": {
-   "price": 62037.35,
-   "t": "2026-11-23T16:45:11Z",
+   "price": 62038.36,
+   "t": "2026-11-23T16:50:11Z",
    "src": "coinbase+kraken"
   },
   "ETH": {
-   "price": 1757.22,
-   "t": "2026-11-23T16:45:11Z",
+   "price": 1761.7,
+   "t": "2026-11-23T16:50:11Z",
    "src": "coinbase+kraken"
   },
   "SOL": {
-   "price": 74.06,
-   "t": "2026-11-23T16:45:11Z",
+   "price": 74.16,
+   "t": "2026-11-23T16:50:11Z",
    "src": "coinbase+kraken"
   }
  },
@@ -118,7 +118,7 @@
   "entries": 3
  },
  "stats": {
-  "cycles": 1870,
+  "cycles": 1875,
   "price_rejects": 0,
   "price_confirms": 0,
   "bars_checked": 36,
@@ -860,6 +860,10 @@
   [
    "2026-11-23T16:37:12Z",
    198.059
+  ],
+  [
+   "2026-11-23T16:47:12Z",
+   196.2098
   ]
  ],
  "log": [
@@ -1012,6 +1016,6 @@
    "msg": "ΑΓΟΡΑ #3 SOL @ $75.70 ($66.53) · stop $71.72"
   }
  ],
- "last_run": "2026-11-23T16:45:11Z",
+ "last_run": "2026-11-23T16:50:11Z",
  "next_id": 4
 }
