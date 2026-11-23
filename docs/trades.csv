@@ -1,1 +1,2 @@
 id,sym,entry_time,exit_time,hold_min,entry_market,exit_market,stop,cost,proceeds,pnl,pnl_pct,peak_pct,reason
+3,SOL,2026-11-23T16:00:55Z,2026-11-23T22:47:15Z,406.3,75.7,71.55,71.72330392336458,66.5336,62.6977,-3.8359,-5.77,0.07,stop
