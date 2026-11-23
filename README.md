@@ -20,4 +20,4 @@
 - Υπόθεση 1 (intraday 5′/15′): [results/BACKTEST.md](results/BACKTEST.md) — απέτυχε
 - Υπόθεση 2 (4ω/ημέρα): [results/BACKTEST_TREND.md](results/BACKTEST_TREND.md) — πέρασε μόνο το Donchian 4ω
 
-_Ενημερώθηκε αυτόματα: 23/11/2026 02:37_
+_Ενημερώθηκε αυτόματα: 23/11/2026 02:38_
